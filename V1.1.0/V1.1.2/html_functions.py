@@ -1,7 +1,8 @@
-eal# IMPORTS ##############################
+# IMPORTS ##############################
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup, Comment
+import data_cleaning
 ########################################
 
 def craft_url(offset: int) -> str:
@@ -12,7 +13,6 @@ def craft_url(offset: int) -> str:
     :return (str): a string contianing the modified url for specific year
     """ 
     return f'https://www.pro-football-reference.com/years/{datetime.now().year - offset}/#all_team_stats'
-    # return f'https://www.pro-football-reference.com/years/2020/#all_team_stats'
 
 def modify_html_code(url: str) -> str:
     """
@@ -41,15 +41,16 @@ def modify_html_code(url: str) -> str:
 
     return str(soup.prettify())
 
-def scrape_website(offset: int) -> list:
+def scrape_website(start: int, offset: int) -> list:
     """
     grabs the table elements from the html code and saves it to a pandas dataframe
 
-    :param html (str): string containing the html code for specified website
+    :param start (int): states the year to start search (CurrentYear - start)
+    :param offset (int): states how far back to go for data search
     :return: None
     """ 
     compiled_data = [] # Holds the table grabbed from website
-    for urls in range(1, offset+1):
+    for urls in range(start+0, offset+1):
         soup = BeautifulSoup(modify_html_code(craft_url(offset=offset)), 'html.parser')
         offensive_stats = soup.find_all('div', id='all_team_stats')
         column_headers, team_data = [], []
@@ -62,8 +63,6 @@ def scrape_website(offset: int) -> list:
                 team_stats = ["Washington Commanders" if "Washington" in team_name else "Las Vegas Raiders" if "Raiders" in team_name else team_name for team_name in team_stats]
                 team_data.append(team_stats)
 
-                compiled_data += team_data
+        compiled_data += team_data
     
-            # TODO: consolidate list function
-        
-scrape_website(4)
+    return data_cleaning.off_cleanup(compiled_data, column_headers[1:])
