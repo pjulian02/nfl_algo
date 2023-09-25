@@ -12,6 +12,7 @@ def craft_url(offset: int) -> str:
     :param offset (int): what year of stats you would like to return {current_year - offset}
     :return (str): a string contianing the modified url for specific year
     """ 
+    url = f'https://www.pro-football-reference.com/years/{datetime.now().year - offset}/#all_team_stats'
     return f'https://www.pro-football-reference.com/years/{datetime.now().year - offset}/#all_team_stats'
 
 def modify_html_code(url: str) -> str:
@@ -50,8 +51,8 @@ def scrape_website(start: int, offset: int) -> list:
     :return: None
     """ 
     compiled_data = [] # Holds the table grabbed from website
-    for urls in range(start+0, offset+1):
-        soup = BeautifulSoup(modify_html_code(craft_url(offset=offset)), 'html.parser')
+    for num in range(start, offset+1):
+        soup = BeautifulSoup(modify_html_code(craft_url(offset=num)), 'html.parser')
         offensive_stats = soup.find_all('div', id='all_team_stats')
         column_headers, team_data = [], []
 
